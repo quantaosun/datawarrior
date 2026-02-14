@@ -10,8 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 public class DEMultiLineTextDialog extends JDialog implements ActionListener {
-	private JTextArea mTextArea;
-	private String mOldValue,mNewValue;
+	private final JTextArea mTextArea;
+	private final String mOldValue;
+	private String mNewValue;
 
 	public DEMultiLineTextDialog(Frame owner, String title, String oldValue) {
 		super(owner, title, true);
@@ -19,7 +20,7 @@ public class DEMultiLineTextDialog extends JDialog implements ActionListener {
 		mOldValue = oldValue;
 		mTextArea = new JTextArea(oldValue);
 
-		// Change font to allow displaying rare unicode characters
+		// Change font to allow displaying rare Unicode characters
 		mTextArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, mTextArea.getFont().getSize()));
 		mTextArea.transferFocus();
 		JScrollPane scrollPane = new JScrollPane(mTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -50,7 +51,7 @@ public class DEMultiLineTextDialog extends JDialog implements ActionListener {
 		});
 
 		JLabel message = new JLabel("Press ESC (Cancel) or Ctrl-ENTER (OK) to close dialog!", JLabel.RIGHT);
-		message.setFont(message.getFont().deriveFont(0,HiDPIHelper.scale(11)));
+		message.setFont(message.getFont().deriveFont(Font.PLAIN, HiDPIHelper.scale(11)));
 
 		JButton bcancel = new JButton("Cancel");
 		bcancel.addActionListener(this);
@@ -59,8 +60,8 @@ public class DEMultiLineTextDialog extends JDialog implements ActionListener {
 		getRootPane().setDefaultButton(bok);
 
 		int gap = HiDPIHelper.scale(8);
-		double[][] size = { {gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED, gap },
-				{gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED, gap} };
+		double[][] size = { {gap, TableLayout.FILL, gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED, gap },
+				{gap, TableLayout.FILL, gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED, gap} };
 		getContentPane().setLayout(new TableLayout(size));
 		getContentPane().add(scrollPane, "1,1,5,1");
 		getContentPane().add(message, "1,3,5,3");

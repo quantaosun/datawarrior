@@ -252,20 +252,19 @@ catena-Poly[[(2,2'-dimethyl-4,4'-bi-1,3-thiazole-N,N')cadmium]-di-bromido]</i></
 3D-structure is often used to search compound collections for similar conformers regarding shape
 and pharmacophore features. With <span class="keyword">DataWarrior</span> you can perform such
 a virtual screening in two different ways, either by aligning the query conformer to a dataset
-with rigid, pre-computed conformers, or by generating conformers on the fly and optimizing their
+of rigid, pre-computed conformers, or by generating conformers on the fly and optimizing their
 torsion angles to maximize query overlap while retaining low energy torsion angles at the same time.</p>
 
-<p>In either of the two options you end up with conformers best-possible aligned to your query
-conformer and with a score that describes how much your aligned conformers overlap and how well
-any pharmacophiric features match. In fact, you get three scores, one for the overlap, one for
-the pharmacophore match and one that summarizes both. For aligning and scoring
+<p>In either of the two options you end up with conformers well aligned to your query
+conformer and with a score that describes how much your aligned conformers overlap regarding their
+spape and regarding pharmacophoric feature overlap at the same time. For aligning and scoring
 <span class="keyword">DataWarrior</span> uses an algorithm called
 <a href="help/phesa.html">PheSA</a> (Pharmacophore enhanced shape alignment), which uses
-Gaussian functions to calculate and optimize the shared volume of two molecules' conformers
-while considering a pharmacophore feature overlay at the same time. The PheSA algorithm was
+Gaussian functions for all atoms to describe the occupied shape of one conformer and to calculate
+and optimize the shared volume of two molecules' conformers. The PheSA algorithm was
 engineered by Joel Wahl and is described in <a href="https://pubs.acs.org/doi/10.1021/acs.jcim.4c00516">
 J. Wahl; <i>PheSA: An Open-Source Tool for Pharmacophore-Enhanced Shape Alignment</i>;
-J. Chem. Inf. Model. 2024, 64, 15, 5944–5953; doi 10.1021/acs.jcim.4c00516</a></p>
+J. Chem. Inf. Model. 2024, 64, 15, 5944-5953; doi 10.1021/acs.jcim.4c00516</a></p>
 
 <p><b>Rigid Alignment:</b> If your dataset doesn't contain at least one column with one or multiple
 conformers, then you need to generate conformers for any of the molecules to be screened as
@@ -306,11 +305,20 @@ best matching isomers and 3D-superpositions.</p>
 
 <p><b>Flexible Alignment:</b> To flexibly align all molecules of an open <span class="keyword">DataWarrior</span>
 file with a given 3D-query molecule (conformer), your <span class="keyword">DataWarrior</span> file
-doesn't need to contain molecule coordinates in 3D. Instead, an initial conformer is calculated on the fly 
-from every molecule, which is then optimized in a step-wise fashion to optimally overlap with the query structure. 
-Typically, flexible PheSA alignment produces better matches than the rigid variant of the algorithm, 
-because in most cases even large conformer sets don't contain perfectly matching conformers, especially, 
-if a molecule has a high flexibility due to many rotatable bonds. In order to flexibly align your molecules 
+doesn't need to contain molecule coordinates in 3D. Instead, an initial conformers are calculated on the fly
+from every molecule. In a first step, these are then rigidly aligned to the query conformer without touching
+their conformation. All rigid alignment solutions are scored regaring the degree of shape and pharmacophoric
+feature overlap. In a second step, then, the best scoring conformers are selected for flexible optization:
+Now these conformers' geometries are changed in a stepwise process, guided by the MMFF94 forcefield,
+to optimally overlap with the query structure while retaining relatively low energy strains.
+Typically, a flexible PheSA alignment produces better matches than the rigid variant of the algorithm,
+because in most cases even large conformer sets don't contain nicely matching conformers, especially,
+if a molecule has a high flexibility due to many rotatable bonds. The price to pay is a longer computation
+time. You may reduce the computation time or increase the precision of hits by changing any of two parameters:
+the initial number of conformers generated to be aligned rigidly, and the number of rigidly aligned conformers,
+which are then run through the flexible optimization process.</p>
+
+<p>In order to start the flexible alignment of your molecules in <span class="keyword">DataWarrior</span>
 with a given conformer choose <span class="menu">Superpose Conformers->Flexible...</span> from the menu and 
 continue as described above.</p>
 <br>

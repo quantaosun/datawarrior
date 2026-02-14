@@ -27,9 +27,11 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 	public static final String TASK_NAME_FLEX = "Superpose Conformer Flexibly";
 
 	private static final String PROPERTY_CONFORMERS = "conformers";
+	private static final String PROPERTY_RIGIDCOUNT = "rigidCount";
+	private static final String PROPERTY_FLEXCOUNT = "flexCount";
+	private static final String DEFAULT_RIGID_COUNT = "64";	// conformers rigidly aligned as candidates for phesa-flex
+	private static final String DEFAULT_FLEX_COUNT = "4";	// chosen conformers from rigid scrore for potential phesa-flex
 	private static final int COLUMNS_PER_CONFORMER = 3;
-	private static final int FLEX_ALIGN_START_CONF_COUNT = 64;	// conformers rigidly aligned as candidates for phesa-flex
-	private static final int FLEX_ALIGN_USED_CONF_COUNT = 4;	// chosen conformers from rigid scrore for potential phesa-flex
 
 	private final DETable mTable;
 	protected JFXMolViewerPanel mConformerPanel;
@@ -38,6 +40,8 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 	private final boolean mIsFlexible;
 	private PheSAAlignmentOptimizer[] mAlignmentOptimizer;
 	private Coordinates[] mCenterOfGravity;
+	private JTextField mTextFieldRigidCount, mTextFieldFlexCount;
+	private int mRigidConformerCount,mFlexConformerCount;
 
 	public DETaskSuperposeConformers(DEFrame parent, boolean flexible) {
 		super(parent, flexible ? DESCRIPTOR_NONE : DESCRIPTOR_3D_COORDINATES, false, true);
@@ -53,8 +57,9 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 	@Override
 	public JPanel getExtendedDialogContent() {
 		int gap = HiDPIHelper.scale(8);
-		double[][] size = { {TableLayout.PREFERRED},
-							{gap, TableLayout.PREFERRED, gap, TableLayout.PREFERRED} };
+		double[] sizeYRigid = {gap, TableLayout.PREFERRED, gap, TableLayout.FILL};
+		double[] sizeYFlex = {gap, TableLayout.PREFERRED, gap, TableLayout.FILL, 2*gap, TableLayout.PREFERRED};
+		double[][] size = { {TableLayout.FILL}, mIsFlexible ? sizeYFlex : sizeYRigid};
 
 		mConformerPanel = new JFXMolViewerPanel(false, V3DScene.CONFORMER_EDIT_MODE);
 		mConformerPanel.adaptToLookAndFeelChanges();
@@ -66,6 +71,21 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 		ep.setLayout(new TableLayout(size));
 		ep.add(new JLabel("Use right mouse click for adding 3D-molecule(s) to be superposed:", JLabel.CENTER), "0,1");
 		ep.add(mConformerPanel, "0,3");
+
+		if (mIsFlexible) {
+			mTextFieldRigidCount = new JTextField(3);
+			mTextFieldFlexCount = new JTextField(3);
+			double[][] countSize = { {TableLayout.PREFERRED, gap, TableLayout.PREFERRED, TableLayout.FILL},
+									 {TableLayout.PREFERRED, gap, TableLayout.PREFERRED}};
+			JPanel countPanel = new JPanel();
+			countPanel.setLayout(new TableLayout(countSize));
+			countPanel.add(new JLabel("Conformers to generate for initial rigid alignment:"), "0,0");
+			countPanel.add(new JLabel("Best rigidly aligned conformers to follow-up on flexibly:"), "0,2");
+			countPanel.add(mTextFieldRigidCount, "2,0");
+			countPanel.add(mTextFieldFlexCount, "2,2");
+			ep.add(countPanel, "0,5");
+		}
+
 		return ep;
 	}
 
@@ -96,6 +116,12 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 			}
 
 		configuration.setProperty(PROPERTY_CONFORMERS, sb.toString());
+
+		if (mTextFieldRigidCount != null)
+			configuration.setProperty(PROPERTY_RIGIDCOUNT, mTextFieldRigidCount.getText());
+		if (mTextFieldFlexCount != null)
+			configuration.setProperty(PROPERTY_FLEXCOUNT, mTextFieldFlexCount.getText());
+
 		return configuration;
 		}
 
@@ -108,11 +134,22 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 			for (StereoMolecule mol:mols)
 				mConformerPanel.addMolecule(mol, null, null);
 			}
+
+		String rigidCount = configuration.getProperty(PROPERTY_RIGIDCOUNT);
+		if (mTextFieldRigidCount != null && rigidCount != null && !rigidCount.isEmpty())
+			mTextFieldRigidCount.setText(rigidCount);
+		String flexCount = configuration.getProperty(PROPERTY_FLEXCOUNT);
+		if (mTextFieldFlexCount != null && flexCount != null && !flexCount.isEmpty())
+			mTextFieldFlexCount.setText(flexCount);
 		}
 
 	@Override
 	public void setDialogConfigurationToDefault() {
 		super.setDialogConfigurationToDefault();
+		if (mTextFieldRigidCount != null)
+			mTextFieldRigidCount.setText(DEFAULT_RIGID_COUNT);
+		if (mTextFieldFlexCount != null)
+			mTextFieldFlexCount.setText(DEFAULT_FLEX_COUNT);
 		}
 
 	private StereoMolecule[] getConformers(Properties configuration) {
@@ -136,8 +173,9 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 	protected void setNewColumnProperties(int firstNewColumn) {
 		int conformerColumn = firstNewColumn;
 		for (int i = 0; i<mConformer.length; i++) {
-			String columnNameEnd = (mConformer[i].getName() != null && !mConformer[i].getName().isEmpty()) ?
-					" "+ mConformer[i].getName() : (mConformer.length == 1) ? "" : " "+(i+1);
+			String columnNameEnd = (mIsFlexible ? " Flex" : " Rigid")
+					+ (mConformer[i].getName() != null && !mConformer[i].getName().isEmpty() ?
+					" "+ mConformer[i].getName() : (mConformer.length == 1 ? "" : " "+(i+1)));
 			getTableModel().setColumnName("Best Match" + columnNameEnd, conformerColumn);
 			getTableModel().setColumnProperty(conformerColumn, CompoundTableConstants.cColumnPropertySpecialType, CompoundTableConstants.cColumnTypeIDCode);
 
@@ -148,7 +186,7 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 			getTableModel().setColumnProperty(coords3DColumn, CompoundTableConstants.cColumnPropertySuperposeMolecule, mConformerIDCode[i]);
 
 			int matchColumn = conformerColumn + 2;
-			getTableModel().setColumnName((mIsFlexible ? "PheSA Flex Score" : "PheSA Rigid Score") + columnNameEnd, matchColumn);
+			getTableModel().setColumnName("PheSA Score" + columnNameEnd, matchColumn);
 
 			conformerColumn += COLUMNS_PER_CONFORMER;
 			}
@@ -164,6 +202,24 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 			showErrorMessage("No query conformers defined.");
 			return false;
 			}
+
+		if (mTextFieldRigidCount != null && mTextFieldFlexCount != null) {
+			try {
+				int rigidCount = Integer.parseInt(mTextFieldRigidCount.getText());
+				int flexCount = Integer.parseInt(mTextFieldFlexCount.getText());
+				if (rigidCount < 1 || flexCount < 1) {
+					showErrorMessage("Conformer counts for rigid or flexible alignment must be positive values.");
+					return false;
+				}
+				if (rigidCount < flexCount) {
+					showErrorMessage("You need to generate at least as many rigid alignments\nas you intend to feed into the flexible alignment afterwards.");
+					return false;
+				}
+			} catch (NumberFormatException e) {
+				showErrorMessage("Conformer count for rigid or flexible alignment is not an integer.");
+				return false;
+			}
+		}
 
 		if (isLive) {
 			if (!mIsFlexible
@@ -201,18 +257,26 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 				mAlignmentOptimizer[i] = new PheSAAlignmentOptimizer(mConformer[i], 0.5);
 				}
 			}
+		try { mRigidConformerCount = Integer.parseInt(configuration.getProperty(PROPERTY_RIGIDCOUNT));
+		} catch (NumberFormatException e) {
+			mRigidConformerCount = 64;
+		}
+		try { mFlexConformerCount = Integer.parseInt(configuration.getProperty(PROPERTY_FLEXCOUNT));
+		} catch (NumberFormatException e) {
+			mFlexConformerCount = 4;
+		}
 		return super.preprocessRows(configuration);
 		}
 
 	@Override
 	public void processRow(int row, int firstNewColumn, StereoMolecule containerMol, int threadIndex) {
 		if (mIsFlexible)
-			processRowFlex(row, firstNewColumn, containerMol, threadIndex);
+			processRowFlex(row, firstNewColumn, containerMol);
 		else
-			processRowRigid(row, firstNewColumn, containerMol, threadIndex);
+			processRowRigid(row, firstNewColumn, containerMol);
 		}
 
-	private void processRowRigid(int row, int firstNewColumn, StereoMolecule containerMol, int threadIndex) {
+	private void processRowRigid(int row, int firstNewColumn, StereoMolecule containerMol) {
 		CompoundRecord record = getTableModel().getTotalRecord(row);
 		byte[] idcode = (byte[])record.getData(getChemistryColumn());
 		if (idcode != null) {
@@ -224,7 +288,7 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 					double bestFit = 0.0f;
 
 					int coordinateIndex = 0;
-					while (coordinateIndex<coords.length) {
+					while (coordinateIndex<coords.length && !threadMustDie()) {
 						try {
 							new IDCodeParser(false).parse(containerMol, idcode, coords, 0, coordinateIndex);
 							MoleculeStandardizer.standardize(containerMol, MoleculeStandardizer.MODE_GET_PARENT);
@@ -261,7 +325,7 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 		}
 	}
 
-	private void processRowFlex(int row, int firstNewColumn, StereoMolecule containerMol, int threadIndex) {
+	private void processRowFlex(int row, int firstNewColumn, StereoMolecule containerMol) {
 		CompoundRecord record = getTableModel().getTotalRecord(row);
 		byte[] idcode = (byte[])record.getData(getChemistryColumn());
 		if (idcode != null) {
@@ -273,9 +337,10 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 			int targetColumn = firstNewColumn;
 			for (int i=0; i<mConformer.length; i++) {
 				SortedList<Conformer> candidateList = new SortedList<>((o1, o2) -> -Double.compare(o1.getEnergy(), o2.getEnergy()));
+
 				ConformerGenerator cg = new ConformerGenerator();
 				cg.initializeConformers(containerMol);
-				while (candidateList.size() < FLEX_ALIGN_START_CONF_COUNT) {
+				while (candidateList.size() < mRigidConformerCount && !threadMustDie()) {
 					if (cg.getNextConformerAsMolecule(containerMol) == null)
 						break;
 
@@ -286,15 +351,19 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 				}
 
 				if (candidateList.size() != 0) {
-					Conformer bestConformer = candidateList.get(0);
-					double bestFit = bestConformer.getEnergy();
+					// Druglike raw conformers from the ConformerGenerator, typically, have energies
+					// off the local minimum of about 100 kcal/mol +-50%. After the PheSA flex procedure
+					// they are more or less minimized and in the range of 10 kcal/mol +-50%.
+					// Therefore, we don't allow rigidly superposed raw conformers as result here.
 
-					for (int j=0; j<Math.min(FLEX_ALIGN_USED_CONF_COUNT, candidateList.size()); j++) {
+					double bestScore = -Double.MAX_VALUE;
+					Conformer bestConformer = null;
+					for (int j=0; j<Math.min(mFlexConformerCount, candidateList.size()); j++) {
 						FlexibleShapeAlignment fsa = new FlexibleShapeAlignment(mConformer[i], candidateList.get(j).toMolecule());
 						double fit = fsa.align()[0];	// WARNING: refMol must be centered for the scoring to work!!!
 
-						if (bestFit<fit) {
-							bestFit = fit;
+						if (bestScore < fit) {
+							bestScore = fit;
 							bestConformer = new Conformer(containerMol);
 						}
 					}
@@ -304,7 +373,7 @@ public class DETaskSuperposeConformers extends DETaskAbstractFromStructure {
 					Canonizer canonizer = new Canonizer(containerMol);
 					getTableModel().setTotalValueAt(canonizer.getIDCode(), row, targetColumn);
 					getTableModel().setTotalValueAt(canonizer.getEncodedCoordinates(true), row, targetColumn + 1);
-					getTableModel().setTotalValueAt(DoubleFormat.toString(bestFit), row, targetColumn + 2);
+					getTableModel().setTotalValueAt(DoubleFormat.toString(bestScore), row, targetColumn + 2);
 				}
 
 				targetColumn += COLUMNS_PER_CONFORMER;

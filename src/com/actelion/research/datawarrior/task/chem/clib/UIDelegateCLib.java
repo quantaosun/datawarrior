@@ -160,10 +160,10 @@ public class UIDelegateCLib implements ActionListener,ChangeListener, GenericEve
 		mDrawPanel.getDrawArea().addDrawAreaListener(this);
 		editorPanel.add(mDrawPanel, "1,1,7,1");
 
-		mComboBoxReaction = new JComboBox();
+		mComboBoxReaction = new JComboBox<>();
 		mComboBoxReaction.addItem(ITEM_CUSTOM_REACTION);
-		for (int i=0; i<REACTION.length; i++)
-			mComboBoxReaction.addItem(REACTION[i][0]);
+		for (String[] reaction : REACTION)
+			mComboBoxReaction.addItem(reaction[0]);
 		mComboBoxReaction.setSelectedIndex(0);
 		mComboBoxReaction.addItemListener(this);
 		editorPanel.add(new JLabel("Use template:"), "1,3");
@@ -207,7 +207,7 @@ public class UIDelegateCLib implements ActionListener,ChangeListener, GenericEve
 			}
 
 		StringBuilder text = new StringBuilder();
-		int productCount = 1;
+		long productCount = 1L;
 		for (CompoundCollectionPane<String[]> pane : mReactantPaneList) {
 			if (text.isEmpty()) {
 				text.append("Products: ");
@@ -274,7 +274,7 @@ public class UIDelegateCLib implements ActionListener,ChangeListener, GenericEve
 			reactantPanel.add(bload, "0,"+(6*i+3));
 
 			MoleculeFilter filter = new SubstructureFilter(reaction.getReactant(i));
-			CompoundCollectionPane reactantPane = new CompoundCollectionPane<>(new DefaultCompoundCollectionModel.IDCodeWithName(), false);
+			CompoundCollectionPane<String[]> reactantPane = new CompoundCollectionPane<>(new DefaultCompoundCollectionModel.IDCodeWithName(), false);
 			reactantPane.setClipboardHandler(new ClipboardHandler());
 			reactantPane.setCompoundFilter(filter);
 			reactantPane.setEditable(true);
@@ -353,9 +353,9 @@ public class UIDelegateCLib implements ActionListener,ChangeListener, GenericEve
 						mDrawPanel.getDrawArea().setReaction(mCustomReaction);
 						}
 					else {
-						for (int i=0; i<REACTION.length; i++) {
-							if (REACTION[i][0].equals(item)) {
-								mDrawPanel.getDrawArea().setReaction(ReactionEncoder.decode(REACTION[i][1], true));
+						for (String[] reaction : REACTION) {
+							if (reaction[0].equals(item)) {
+								mDrawPanel.getDrawArea().setReaction(ReactionEncoder.decode(reaction[1], true));
 								return;
 								}
 							}

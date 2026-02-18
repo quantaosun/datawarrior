@@ -211,10 +211,12 @@ public abstract class ClientCommunicator extends CommunicationHelper {
 		boolean mayUseSecondaryServer = (getSecondaryServerURL() != null && mSessionServerURL == null);
 
 		if (!isUseSecondaryServer() || mSessionServerURL != null) {
+			String url = null;
 			try {
-				String url = (mSessionServerURL != null) ? mSessionServerURL : getPrimaryServerURL();
+				url = (mSessionServerURL != null) ? mSessionServerURL : getPrimaryServerURL();
 				Object response = getResponseWithURL(url, request, plainResult, keyValuePair);
-				if (response != null)
+				if (response != null
+				 && !(mayUseSecondaryServer && response instanceof String && ((String)response).startsWith(BODY_ERROR)))
 					return response;
 				}
 			catch (ServerErrorException see) {  // server reached, but could not satisfy request
@@ -222,21 +224,15 @@ public abstract class ClientCommunicator extends CommunicationHelper {
 				showErrorMessage(see.getMessage());
 				return null;
 				}
-			catch (ConnectException ce) {  // connection refused
-				reportException(ce);
+			catch (ConnectException | UnknownHostException | SocketTimeoutException e) {  // connection refused
+				reportException(e);
 				if (!mayUseSecondaryServer) {
-					showErrorMessage(ce.toString());
+					showErrorMessage(e.toString());
 					return null;
 					}
-				showBusyMessage("Connection refused. Trying alternative server...");
-				}
-			catch (SocketTimeoutException ste) {  // timed out
-				reportException(ste);
-				if (!mayUseSecondaryServer) {
-					showErrorMessage(ste.toString());
-					return null;
-					}
-				showBusyMessage("Connection timed out. Trying alternative server...");
+				String reason = (e instanceof UnknownHostException) ? "Unknown host:"+url
+							  : (e instanceof ConnectException) ? "Connection refused" : "Connection timed out";
+				showBusyMessage(reason.concat(". Trying alternative server..."));
 				}
 			catch (IOException ioe) {
 				reportException(ioe);

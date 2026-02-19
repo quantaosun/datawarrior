@@ -47,6 +47,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 public class DEMainPane extends JDockingPanel
 		implements CompoundTableListener,CompoundTableListListener,ListSelectionListener,ViewSelectionHelper,VisualizationListener {
@@ -64,6 +65,11 @@ public class DEMainPane extends JDockingPanel
 	public static final Dimension MINIMUM_SIZE = new Dimension(128, 128);
 	public static final Dimension MINIMUM_VIEW_SIZE = new Dimension(64, 64);
 
+	private static final long DEFAULT_VIEW_GRACE_PERIOD = 8000;
+	private static final long DEFAULT_VIEW_REMOVALS_TILL_MESSAGE = 8;
+	private static final String PREFERENCES_KEY_SKIP_DEFAULT_VIEWS = "add_default_views";
+	private static final String PREFERENCES_KEY_DEFAULT_VIEW_REMOVALS = "default_views_removals";
+
 	private static final String COMMAND_NEW_2D_VIEW = "new2D_";
 	private static final String COMMAND_NEW_3D_VIEW = "new3D_";
 	private static final String COMMAND_NEW_STRUCTURE_GRID = "newSG_";
@@ -80,18 +86,20 @@ public class DEMainPane extends JDockingPanel
 	private static final String ITEM_NEW_EXPLANATION_VIEW = "New Explanation View";
 
 
-	private DEFrame						mParentFrame;
-	private ApplicationViewFactory		mAppViewFactory;	// creates views that are not supported by the DataWarriorApplet
-	private DECompoundTableModel		mTableModel;
-	private CompoundListSelectionModel  mListSelectionModel;
-	private DEParentPane				mParentPane;
-	private DEDetailPane				mDetailPane;
-	private DEStatusPanel				mStatusPanel;
-	private CompoundTableColorHandler	mColorHandler;
-	private ArrayList<DETableRowTaskDef> mRowTaskList;
-	private DENews                      mPermanentNews;
-	private Rectangle                   mNewsButtonRect;
-	private boolean                     mNewsButtonActive;
+	private final DEFrame					mParentFrame;
+	private final DECompoundTableModel		mTableModel;
+	private final CompoundListSelectionModel mListSelectionModel;
+	private final DEParentPane				mParentPane;
+	private final DEDetailPane				mDetailPane;
+	private final DEStatusPanel				mStatusPanel;
+	private final CompoundTableColorHandler	mColorHandler;
+	private final ArrayList<DETableRowTaskDef> mRowTaskList;
+	private ApplicationViewFactory	mAppViewFactory;	// creates views that are not supported by the DataWarriorApplet
+	private DENews		mPermanentNews;
+	private Rectangle   mNewsButtonRect;
+	private boolean     mNewsButtonActive;
+	private long		mDefaultViewCreationMillis;
+	private int			mImmediateClosedDefaultViewCount;
 
 	public DEMainPane(DEFrame parent,
 					  DECompoundTableModel tableModel,
@@ -268,8 +276,9 @@ if (selectionModel.getMinSelectionIndex() != selectionModel.getMaxSelectionIndex
 		if (e.getType() == CompoundTableEvent.cNewTable) {
 			removeAllViews();
 			addTableView("Table", "root");
-			if (e.getSpecifier() == CompoundTableEvent.cSpecifierDefaultViews
-			 || e.getSpecifier() == CompoundTableEvent.cSpecifierDefaultFiltersAndViews) {
+			if ((e.getSpecifier() == CompoundTableEvent.cSpecifierDefaultViews
+			  || e.getSpecifier() == CompoundTableEvent.cSpecifierDefaultFiltersAndViews)
+			 && !DataWarrior.getPreferences().getBoolean(PREFERENCES_KEY_SKIP_DEFAULT_VIEWS, false)) {
 				add2DView("2D View", "Table\tbottom").setDefaultColumns();
 				add3DView("3D View", "2D View\tright").setDefaultColumns();
 				for (int column=0; column<mTableModel.getTotalColumnCount(); column++) {
@@ -282,6 +291,8 @@ if (selectionModel.getMinSelectionIndex() != selectionModel.getMaxSelectionIndex
 					}
 				if (mTableModel.getExtensionData(CompoundTableConstants.cExtensionNameFileExplanation) != null)
 					addExplanationView("Explanation", "Table\ttop\t0.25");
+				mDefaultViewCreationMillis = System.currentTimeMillis();
+				mImmediateClosedDefaultViewCount = 0;
 				}
 			}
 
@@ -601,8 +612,36 @@ if (selectionModel.getMinSelectionIndex() != selectionModel.getMaxSelectionIndex
 		if (isMaximized())
 			maximize(title, null);
 
-		((CompoundTableView)getDockable(title).getContent()).cleanup();
+		CompoundTableView view = ((CompoundTableView)getDockable(title).getContent());
+
+		view.cleanup();
 		undock(title, false);
+
+		Preferences prefs = DataWarrior.getPreferences();
+		if (!prefs.getBoolean(PREFERENCES_KEY_SKIP_DEFAULT_VIEWS, false) && !DEMacroRecorder.getInstance().isRunningMacro()) {
+			if (System.currentTimeMillis() - mDefaultViewCreationMillis < DEFAULT_VIEW_GRACE_PERIOD) {
+				if (title.equals(getDefaultViewName(VIEW_TYPE_2D, -1))
+				 || title.equals(getDefaultViewName(VIEW_TYPE_3D, -1))) {
+					mImmediateClosedDefaultViewCount++;
+					if (mImmediateClosedDefaultViewCount == 2) {
+						mDefaultViewCreationMillis = 0;
+						int removals = prefs.getInt(PREFERENCES_KEY_DEFAULT_VIEW_REMOVALS, 0) + 1;
+						prefs.putInt(PREFERENCES_KEY_DEFAULT_VIEW_REMOVALS, removals);
+						for (int i=0; i<5; i++) {
+							if (removals == (DEFAULT_VIEW_REMOVALS_TILL_MESSAGE << i)
+							 && JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(mParentFrame,
+										"You seem to immediately close graphical default views very often.\n"
+										+"Do you want DataWarrior to skip creating these views in the future?\n"
+										+"You still will be able to add views manually using the '+' button.",
+										"Skip Default View Creation?", JOptionPane.YES_NO_OPTION)) {
+								prefs.putBoolean(PREFERENCES_KEY_SKIP_DEFAULT_VIEWS, true);
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
 
 		mParentPane.fireRuntimePropertyChanged(
 				new RuntimePropertyEvent(this, RuntimePropertyEvent.TYPE_REMOVE_VIEW, -1));

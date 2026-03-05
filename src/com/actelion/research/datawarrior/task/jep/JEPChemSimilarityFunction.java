@@ -21,6 +21,7 @@ package com.actelion.research.datawarrior.task.jep;
 import com.actelion.research.chem.IDCodeParser;
 import com.actelion.research.chem.StereoMolecule;
 import com.actelion.research.chem.descriptor.DescriptorHandler;
+import com.actelion.research.chem.descriptor.DescriptorHandlerFlexophore;
 import com.actelion.research.chem.reaction.Reaction;
 import com.actelion.research.chem.reaction.ReactionEncoder;
 import com.actelion.research.table.model.CompoundTableModel;
@@ -39,7 +40,7 @@ import java.util.Stack;
 public class JEPChemSimilarityFunction extends PostfixMathCommand {
 	public static final String FUNCTION_NAME = "chemsim";
 
-	private CompoundTableModel mTableModel;
+	private final CompoundTableModel mTableModel;
     private String mPreviousChemCode;
     private Object mDescriptor;
 
@@ -70,32 +71,29 @@ public class JEPChemSimilarityFunction extends PostfixMathCommand {
 
 		// check whether the argument is of the right type
 
-		if (param1 instanceof JEPParameter
+		if (param1 instanceof JEPParameter jepParam1
          && (param2 instanceof JEPParameter || param2 instanceof String)) {
 
             // calculate the result
-            JEPParameter jepParam1 = (JEPParameter)param1;
-            DescriptorHandler handler1 = (jepParam1 == null) ? null : mTableModel.getDescriptorHandler(jepParam1.column);
+			DescriptorHandler handler1 = mTableModel.getDescriptorHandler(jepParam1.column);
             if (handler1 == null)
                 throw new ParseException("1st parameter of chemsim() is not a descriptor column.");
 
-            Object value1 = (jepParam1 == null) ? null : jepParam1.record.getData(jepParam1.column);
+            Object value1 = jepParam1.record.getData(jepParam1.column);
             Object value2 = null;
 
             if (value1 == null)
                 throw new ParseException("1st parameter of chemsim() is empty");
 
-            if (param2 instanceof JEPParameter) {
-                JEPParameter jepParam2 = (JEPParameter)param2;
-
-                if (jepParam2.record.getData(jepParam2.column) == null)
+            if (param2 instanceof JEPParameter jepParam2) {
+				if (jepParam2.record.getData(jepParam2.column) == null)
                     throw new ParseException("2nd parameter of chemsim() is empty");
 
                 if (mTableModel.isDescriptorColumn(jepParam2.column)) {
 	                DescriptorHandler handler2 = mTableModel.getDescriptorHandler(jepParam2.column);
 	                if (!handler1.getInfo().shortName.equals(handler2.getInfo().shortName))
 	                    throw new ParseException("1st and 2nd parameters of chemsim() are incompatible descriptors.");
-	                value2 = (jepParam2 == null) ? null : jepParam2.record.getData(jepParam2.column);
+	                value2 = jepParam2.record.getData(jepParam2.column);
 	                }
 	            else if (mTableModel.isColumnTypeStructure(jepParam2.column)) {
 	            	if (!mTableModel.isColumnTypeStructure(mTableModel.getParentColumn(jepParam1.column)))
@@ -120,7 +118,9 @@ public class JEPChemSimilarityFunction extends PostfixMathCommand {
     	            	if (mTableModel.isColumnTypeStructure(mTableModel.getParentColumn(jepParam1.column))) {
     	            		mPreviousChemCode = (String)param2;
     	            		StereoMolecule mol = new IDCodeParser(handler1.getInfo().needsCoordinates).getCompactMolecule(mPreviousChemCode);
-                            mDescriptor = handler1.createDescriptor(mol);
+                            mDescriptor = (mol.is3D() && handler1 instanceof DescriptorHandlerFlexophore) ?
+									  ((DescriptorHandlerFlexophore)handler1).createDescriptorSingleConf(mol)
+									: handler1.createDescriptor(mol);
     	            		}
     	            	else if (mTableModel.isColumnTypeReaction(mTableModel.getParentColumn(jepParam1.column))) {
     	            		mPreviousChemCode = (String)param2;
@@ -135,7 +135,7 @@ public class JEPChemSimilarityFunction extends PostfixMathCommand {
             	value2 = mDescriptor;
             	}
 
-            double similarity = handler1.getSimilarity(value1, value2);
+            double similarity = handler1.getSimilarity(value2, value1);	// in case of flexophore first param is query, which in case of singleConfFlexophore should be used for this
             inStack.push(Double.valueOf(similarity));
 		    }
         else {

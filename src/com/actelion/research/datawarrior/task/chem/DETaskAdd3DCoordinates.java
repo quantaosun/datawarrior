@@ -644,6 +644,8 @@ public class DETaskAdd3DCoordinates extends DETaskAbstractFromStructure {
 		if (mol == null || mol.getAllAtoms() == 0)
 			return;
 
+		int maxTorsionSets = (int)Math.max(2 * mMaxConformers, (1000 * Math.sqrt(mMaxConformers)));
+
 		boolean isOneStereoIsomer = !hasMultipleStereoIsomers(mol);
 		ConformerGenerator cg = null;
 		ConformationSelfOrganizer cs = null;
@@ -668,28 +670,28 @@ public class DETaskAdd3DCoordinates extends DETaskAbstractFromStructure {
 			case ADAPTIVE_RANDOM:
 				if (cg == null) {
 					cg = new ConformerGenerator(mMinimization == MINIMIZE_MMFF94sPlus);
-					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_ADAPTIVE_RANDOM, 1000, mTorsionSource == TORSION_SOURCE_6_STEPS);
+					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_ADAPTIVE_RANDOM, maxTorsionSets, mTorsionSource == TORSION_SOURCE_6_STEPS);
 					}
 				mol = cg.getNextConformerAsMolecule(mol);
 				break;
 			case SYSTEMATIC:
 				if (cg == null) {
 					cg = new ConformerGenerator(mMinimization == MINIMIZE_MMFF94sPlus);
-					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_LIKELY_SYSTEMATIC, 1000, mTorsionSource == TORSION_SOURCE_6_STEPS);
+					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_LIKELY_SYSTEMATIC, maxTorsionSets, mTorsionSource == TORSION_SOURCE_6_STEPS);
 					}
 				mol = cg.getNextConformerAsMolecule(mol);
 				break;
 			case LOW_ENERGY_RANDOM:
 				if (cg == null) {
 					cg = new ConformerGenerator(mMinimization == MINIMIZE_MMFF94sPlus);
-					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_LIKELY_RANDOM, 1000, mTorsionSource == TORSION_SOURCE_6_STEPS);
+					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_LIKELY_RANDOM, maxTorsionSets, mTorsionSource == TORSION_SOURCE_6_STEPS);
 					}
 				mol = cg.getNextConformerAsMolecule(mol);
 				break;
 			case PURE_RANDOM:
 				if (cg == null) {
 					cg = new ConformerGenerator(mMinimization == MINIMIZE_MMFF94sPlus);
-					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_PURE_RANDOM, 1000, mTorsionSource == TORSION_SOURCE_6_STEPS);
+					cg.initializeConformers(mol, ConformerGenerator.STRATEGY_PURE_RANDOM, maxTorsionSets, mTorsionSource == TORSION_SOURCE_6_STEPS);
 					}
 				mol = cg.getNextConformerAsMolecule(mol);
 				break;
@@ -921,7 +923,7 @@ public class DETaskAdd3DCoordinates extends DETaskAbstractFromStructure {
 				addConformersToQueue3(row, protonationState, i, sie, createEnantiomers, builder);
 		}
 
-	private void addConformersToQueue3(int row, int protonationState, int stereoIsomer, StereoIsomerEnumerator stereoIsomerEnumerator, boolean createEnantiomers, StringBuilder builder) throws Exception {
+	private void addConformersToQueue3(int row, int protonationState, int stereoIsomer, StereoIsomerEnumerator stereoIsomerEnumerator, boolean createEnantiomers, StringBuilder builder) {
 		ConformerGenerator cg = null;
 		ConformationSelfOrganizer cs = null;
 

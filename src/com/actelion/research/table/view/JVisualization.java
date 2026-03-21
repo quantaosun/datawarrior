@@ -3933,7 +3933,7 @@ public abstract class JVisualization extends JComponent
 		VisualizationPoint marker = findMarker(e.getX(), e.getY());
 		if (oldLabel != mHighlightedLabelPosition || showCrossHair())
 			repaint();
-		if (mHighlightedPoint != marker)
+		if (!e.isAltDown() && mHighlightedPoint != marker)
 			mTableModel.setHighlightedRow((marker == null) ? null : marker.record);
 		}
 

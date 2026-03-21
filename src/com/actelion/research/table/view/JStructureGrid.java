@@ -805,10 +805,12 @@ public class JStructureGrid extends JScrollPane
 		}
 
 	public synchronized void mouseMoved(MouseEvent e) {
-		int index = getIndex(e.getX(), e.getY());
-		CompoundRecord record = (index == -1) ? null : getRecord(index);
-		if (mHighlightedRow != record)
-			mTableModel.setHighlightedRow(record);
+		if (!e.isAltDown()) {
+			int index = getIndex(e.getX(), e.getY());
+			CompoundRecord record = (index == -1) ? null : getRecord(index);
+			if (mHighlightedRow != record)
+				mTableModel.setHighlightedRow(record);
+			}
 		}
 
 	public synchronized void mouseDragged(MouseEvent e) {

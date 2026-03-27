@@ -29,17 +29,15 @@ import com.actelion.research.table.model.CompoundTableEvent;
 import com.actelion.research.table.model.CompoundTableListHandler;
 import com.actelion.research.table.model.CompoundTableModel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.TreeSet;
+import java.util.*;
 
 
 public class DETaskNewFileFromList extends DETaskAbstractListTask {
 	public static final String TASK_NAME = "New File From List";
 
-	private DEFrame		mSourceFrame,mTargetFrame;
-	private DataWarrior	mApplication;
+	private final DataWarrior	mApplication;
+	private final DEFrame		mSourceFrame;
+	private DEFrame				mTargetFrame;
 
 	/**
 	 * The listIndex parameter may be used to override the configuration's list name.
@@ -74,7 +72,7 @@ public class DETaskNewFileFromList extends DETaskAbstractListTask {
 		CompoundTableListHandler sourceHitlistHandler = sourceTableModel.getListHandler();
 
 	   	boolean[] hitlistUsed = new boolean[sourceHitlistHandler.getListCount()];
-	   	long hitlistMask[] = null;
+	   	long[] hitlistMask = null;
 	   	if (hitlistUsed.length != 0) {
 	   		hitlistMask = new long[hitlistUsed.length];
 	   		for (int i=0; i<hitlistUsed.length; i++)
@@ -115,10 +113,9 @@ public class DETaskNewFileFromList extends DETaskAbstractListTask {
 					targetTableModel.setTotalValueAt(sourceTableModel.encodeDataWithDetail(record, column), targetRow, column);
 					String[][] key = record.getDetailReferences(column);
 					if (key != null)
-   						for (int detailIndex=0; detailIndex<key.length; detailIndex++)
-   							if (key[detailIndex] != null)
-   								for (int i=0; i<key[detailIndex].length; i++)
-   									detaiIDSet.add(key[detailIndex][i]);
+						for (String[] strings : key)
+							if (strings != null)
+								Collections.addAll(detaiIDSet, strings);
  					}
  				targetRow++;
 				}
@@ -152,7 +149,7 @@ public class DETaskNewFileFromList extends DETaskAbstractListTask {
 			targetTableModel.setExtensionData(CompoundTableConstants.cExtensionNameFileExplanation, explanation);
 
 		ArrayList<DEMacro> macroList = (ArrayList<DEMacro>) sourceTableModel.getExtensionData(CompoundTableConstants.cExtensionNameMacroList);
-		if (macroList != null && macroList.size() != 0) {
+		if (macroList != null && !macroList.isEmpty()) {
 			ArrayList<DEMacro> copy = new ArrayList<>();
 			for (DEMacro macro:macroList)
 				copy.add(new DEMacro(macro.getName(), copy, macro));

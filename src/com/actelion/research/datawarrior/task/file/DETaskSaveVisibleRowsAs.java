@@ -18,15 +18,14 @@
 
 package com.actelion.research.datawarrior.task.file;
 
-import java.util.Properties;
-
 import com.actelion.research.datawarrior.DEFrame;
+import com.actelion.research.table.CompoundTableSaver;
 
 public class DETaskSaveVisibleRowsAs extends DETaskAbstractSaveNativeFile {
     public static final String TASK_NAME = "Save Visible Rows";
 
 	public DETaskSaveVisibleRowsAs(DEFrame parent) {
-		super(parent, "Save Visible Rows Only", true);
+		super(parent, "Save Visible Rows Only", CompoundTableSaver.ROW_MASK_VISIBLE);
 		}
 
 	@Override

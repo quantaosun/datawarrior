@@ -42,6 +42,8 @@ import com.actelion.research.datawarrior.task.macro.*;
 import com.actelion.research.datawarrior.task.table.*;
 import com.actelion.research.datawarrior.task.view.*;
 import com.actelion.research.gui.FileHelper;
+import com.actelion.research.table.CompoundTableSaver;
+import com.actelion.research.table.model.CompoundRecord;
 import org.openmolecules.datawarrior.plugin.IPluginTask;
 
 import java.util.ArrayList;
@@ -173,6 +175,15 @@ public class StandardTaskFactory {
 			 : codeMatches(taskCode, DETaskExitProgram.TASK_NAME) ? new DETaskExitProgram(frame, application)
 			 : codeMatches(taskCode, DETaskExportHitlist.TASK_NAME) ? new DETaskExportHitlist(frame, false)
 			 : codeMatches(taskCode, DETaskExportMacro.TASK_NAME) ? new DETaskExportMacro(frame, null)
+			 : codeMatches(taskCode, DETaskExportSDFile.TASK_NAME_ALL) ? new DETaskExportSDFile(frame, CompoundTableSaver.ROW_MASK_ALL)
+			 : codeMatches(taskCode, DETaskExportSDFile.TASK_NAME_SEL) ? new DETaskExportSDFile(frame, CompoundRecord.cFlagMaskSelected)
+			 : codeMatches(taskCode, DETaskExportSDFile.TASK_NAME_VIS) ? new DETaskExportSDFile(frame, CompoundTableSaver.ROW_MASK_VISIBLE)
+			 : codeMatches(taskCode, DETaskExportTextFileAs.TASK_NAME_ALL_CSV) ? new DETaskExportTextFileAs(frame, FileHelper.cFileTypeTextCommaSeparated, CompoundTableSaver.ROW_MASK_ALL)
+			 : codeMatches(taskCode, DETaskExportTextFileAs.TASK_NAME_ALL_TXT) ? new DETaskExportTextFileAs(frame, FileHelper.cFileTypeTextTabDelimited, CompoundTableSaver.ROW_MASK_ALL)
+			 : codeMatches(taskCode, DETaskExportTextFileAs.TASK_NAME_SEL_CSV) ? new DETaskExportTextFileAs(frame, FileHelper.cFileTypeTextCommaSeparated, CompoundRecord.cFlagMaskSelected)
+			 : codeMatches(taskCode, DETaskExportTextFileAs.TASK_NAME_SEL_TXT) ? new DETaskExportTextFileAs(frame, FileHelper.cFileTypeTextTabDelimited, CompoundRecord.cFlagMaskSelected)
+			 : codeMatches(taskCode, DETaskExportTextFileAs.TASK_NAME_VIS_CSV) ? new DETaskExportTextFileAs(frame, FileHelper.cFileTypeTextCommaSeparated, CompoundTableSaver.ROW_MASK_VISIBLE)
+			 : codeMatches(taskCode, DETaskExportTextFileAs.TASK_NAME_VIS_TXT) ? new DETaskExportTextFileAs(frame, FileHelper.cFileTypeTextTabDelimited, CompoundTableSaver.ROW_MASK_VISIBLE)
 			 : codeMatches(taskCode, DETaskExtendRowSelection.TASK_NAME) ? new DETaskExtendRowSelection(frame, -1, -1)
 			 : codeMatches(taskCode, DETaskExtractCatalysts.TASK_NAME) ? new DETaskExtractCatalysts(frame)
 			 : codeMatches(taskCode, DETaskExtractProducts.TASK_NAME) ? new DETaskExtractProducts(frame)
@@ -232,10 +243,8 @@ public class StandardTaskFactory {
 			 : codeMatches(taskCode, DETaskRunMacroFromFile.TASK_NAME) ? new DETaskRunMacroFromFile(application)
 			 : codeMatches(taskCode, DETaskSaveFile.TASK_NAME) ? new DETaskSaveFile(frame)
 			 : codeMatches(taskCode, DETaskSaveFileAs.TASK_NAME) ? new DETaskSaveFileAs(frame)
-			 : codeMatches(taskCode, DETaskSaveSDFileAs.TASK_NAME) ? new DETaskSaveSDFileAs(frame)
+			 : codeMatches(taskCode, DETaskSaveSelectedRowsAs.TASK_NAME) ? new DETaskSaveSelectedRowsAs(frame)
 			 : codeMatches(taskCode, DETaskSaveTemplateFileAs.TASK_NAME) ? new DETaskSaveTemplateFileAs(frame)
-			 : codeMatches(taskCode, DETaskSaveTextFileAs.TASK_NAME_CSV) ? new DETaskSaveTextFileAs(frame, FileHelper.cFileTypeTextCommaSeparated)
-			 : codeMatches(taskCode, DETaskSaveTextFileAs.TASK_NAME_TXT) ? new DETaskSaveTextFileAs(frame, FileHelper.cFileTypeTextTabDelimited)
 			 : codeMatches(taskCode, DETaskSaveVisibleRowsAs.TASK_NAME) ? new DETaskSaveVisibleRowsAs(frame)
 			 : codeMatches(taskCode, DETaskSearchGooglePatents.TASK_NAME) ? new DETaskSearchGooglePatents(frame, application)
 			 : codeMatches(taskCode, DETaskSearchPatentReactions.TASK_NAME) ? new DETaskSearchPatentReactions(frame, application)
@@ -417,6 +426,15 @@ public class StandardTaskFactory {
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_MACRO, DETaskExitProgram.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_LIST, DETaskExportHitlist.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_MACRO, DETaskExportMacro.TASK_NAME));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportSDFile.TASK_NAME_ALL));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportSDFile.TASK_NAME_SEL));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportSDFile.TASK_NAME_VIS));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportTextFileAs.TASK_NAME_ALL_CSV));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportTextFileAs.TASK_NAME_ALL_TXT));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportTextFileAs.TASK_NAME_SEL_CSV));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportTextFileAs.TASK_NAME_SEL_TXT));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportTextFileAs.TASK_NAME_VIS_CSV));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskExportTextFileAs.TASK_NAME_VIS_TXT));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_EDIT, DETaskExtendRowSelection.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_CHEMISTRY, DETaskExtractCatalysts.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_CHEMISTRY, DETaskExtractProducts.TASK_NAME));
@@ -475,10 +493,8 @@ public class StandardTaskFactory {
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskRunMacroFromFile.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveFile.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveFileAs.TASK_NAME));
-			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveSDFileAs.TASK_NAME));
+			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveSelectedRowsAs.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveTemplateFileAs.TASK_NAME));
-			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveTextFileAs.TASK_NAME_CSV));
-			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveTextFileAs.TASK_NAME_TXT));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_FILE, DETaskSaveVisibleRowsAs.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_DATABASE, DETaskSearchGooglePatents.TASK_NAME));
 			mTaskDictionary.add(new TaskSpecification(TaskSpecification.CATEGORY_DATABASE, DETaskSearchPatentReactions.TASK_NAME));

@@ -33,10 +33,12 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.Serial;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class JStructureFilterPanel extends JFilterPanel implements ChangeListener,DescriptorConstants,ItemListener {
+	@Serial
 	private static final long serialVersionUID = 0x20060925;
 
 	private static final int MIN_ROWS_TO_SHOW_PROGRESS = 20000;
@@ -47,14 +49,14 @@ public abstract class JStructureFilterPanel extends JFilterPanel implements Chan
 	protected static final String cItemContains = "contains";
 	protected static final String cItemIsSimilarTo = "is similar to";
 
-	protected float[][]	mSimilarity;
-	protected int[]		mDescriptorColumn;
-	protected JComboBox	mComboBox;
+	protected float[][]		mSimilarity;
+	protected int[]			mDescriptorColumn;
+	protected JComboBox<String>	mComboBox;
 
-	private Frame		mParentFrame;
-	private JSlider		mSimilaritySlider;
-	private int			mCurrentDescriptorColumn;
-	private String		mReactionPart;
+	private final Frame		mParentFrame;
+	private JSlider			mSimilaritySlider;
+	private int				mCurrentDescriptorColumn;
+	private final String	mReactionPart;
 
 	public JStructureFilterPanel(Frame parent, CompoundTableModel tableModel, int column, String reactionPart, int exclusionFlag) {
 		super(tableModel, column, exclusionFlag, false, true);
@@ -71,9 +73,9 @@ public abstract class JStructureFilterPanel extends JFilterPanel implements Chan
 	protected JSlider getSimilaritySlider() {
 		if (mSimilaritySlider == null) {
 			Hashtable<Integer,JLabel> labels = new Hashtable<Integer,JLabel>();
-			labels.put(Integer.valueOf(0), new JLabel("0"));
-			labels.put(Integer.valueOf(50), new JLabel("\u00BD"));
-			labels.put(Integer.valueOf(100), new JLabel("1"));
+			labels.put(0, new JLabel("0"));
+			labels.put(50, new JLabel("½"));
+			labels.put(100, new JLabel("1"));
 			mSimilaritySlider = new JSlider(JSlider.VERTICAL, 0, 100, 80);
 			mSimilaritySlider.setOpaque(false);
 			mSimilaritySlider.setMinorTickSpacing(10);
@@ -305,11 +307,11 @@ public abstract class JStructureFilterPanel extends JFilterPanel implements Chan
 					}
 
 				if (mSimilarity == null) {
-					setEnabled(false);	// treat this as user change, since the user actively cancelled
+					setEnabled(false);	// treat this as user change, since the user actively canceled
 					}
 				else {
-					// If we use a flexophore, we have to tell the table model, because it tracks most recent flexophores
-					// for atom contribution coloring.
+					// If we use a flexophore, we have to tell the table model,
+					// because it tracks most recent flexophores for atom contribution coloring.
 					if (DESCRIPTOR_Flexophore.shortName.equals(mTableModel.getColumnSpecialType(descriptorColumn))
 					 && getStructureCount() == 1)
 						mTableModel.setMostRecentExclusionFlexophore(getStructure(0), mExclusionFlag, descriptorColumn);
@@ -371,6 +373,7 @@ public abstract class JStructureFilterPanel extends JFilterPanel implements Chan
 			return similarity;
 		
 		JProgressDialog progressDialog = new JProgressDialog(mParentFrame) {
+			@Serial
 			private static final long serialVersionUID = 0x20110325;
 
 			public void stopProgress() {

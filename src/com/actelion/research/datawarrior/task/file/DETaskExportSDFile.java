@@ -33,8 +33,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Properties;
 
-public class DETaskSaveSDFileAs extends DETaskAbstractSaveFile {
-    public static final String TASK_NAME = "Save SD-File";
+public class DETaskExportSDFile extends DETaskAbstractSaveFile {
+    public static final String TASK_NAME_ALL = "Export SD-File";
+	public static final String TASK_NAME_SEL = "Export Selection As SD-File";
+	public static final String TASK_NAME_VIS = "Export Visible Rows As SD-File";
 
 	private static final String PROPERTY_SD_VERSION = "version";
 	private static final String PROPERTY_STRUCTURE_COLUMN = "structureColumn";
@@ -59,6 +61,7 @@ public class DETaskSaveSDFileAs extends DETaskAbstractSaveFile {
 	private Properties mPredefinedConfiguration;
 	private JComboBox<String> mComboBoxVersion,mComboBoxStructureColumn,mComboBoxCompoundName,mComboBoxCoordinateMode;
 	private JCheckBox mCheckBoxIncludeRefMol;
+	private final long mRowMask;
 
 	/**
 	 * The logic of this task is different from its parent class DETaskAbstractSaveFile:<br>
@@ -72,13 +75,19 @@ public class DETaskSaveSDFileAs extends DETaskAbstractSaveFile {
 	 * the entire task.
 	 * @param parent
 	 */
-	public DETaskSaveSDFileAs(DEFrame parent) {
-		super(parent, "");
+	public DETaskExportSDFile(DEFrame parent, long rowMask) {
+		super(parent, getTaskName(rowMask));
+		mRowMask = rowMask;
 		}
+
+	private static String getTaskName(long rowMask) {
+		return rowMask == CompoundTableSaver.ROW_MASK_ALL ? TASK_NAME_ALL
+			 : rowMask == CompoundTableSaver.ROW_MASK_VISIBLE ? TASK_NAME_VIS : TASK_NAME_SEL;
+	}
 
 	@Override
 	public String getTaskName() {
-		return TASK_NAME;
+		return getTaskName(mRowMask);
 		}
 
 	@Override
@@ -409,7 +418,7 @@ public class DETaskSaveSDFileAs extends DETaskAbstractSaveFile {
 		 && CompoundTableModel.cColumnType3DCoordinates.equals(tableModel.getColumnSpecialType(coordsColumn)))
 			refMol = getRefMols(coordsColumn);
 
-		new CompoundTableSaver(getParentFrame(), tableModel, table).saveSDFile(file,  fileType, structureColumn, nameColumn, coordsColumn, refMol);
+		new CompoundTableSaver(getParentFrame(), tableModel, table).saveSDFile(file,  fileType, mRowMask, structureColumn, nameColumn, coordsColumn, refMol);
 		}
 
 	private StereoMolecule[] getRefMols(int coordsColumn ) {

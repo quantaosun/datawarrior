@@ -18,28 +18,23 @@
 
 package com.actelion.research.datawarrior.task.file;
 
-import info.clearthought.layout.TableLayout;
-
-import java.io.File;
-import java.util.Properties;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import com.actelion.research.chem.io.CompoundFileHelper;
 import com.actelion.research.datawarrior.DEFrame;
+import info.clearthought.layout.TableLayout;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.Properties;
 
 public abstract class DETaskAbstractSaveNativeFile extends DETaskAbstractSaveFile {
 	private static final String PROPERTY_EMBED_DETAIL = "embedDetail";
 
-	private boolean mVisibleOnly;
+	private final long mRowMask;
 	private JCheckBox mCheckBoxEmbedDetails;
 
-	public DETaskAbstractSaveNativeFile(DEFrame parent, String dialogTitle, boolean visibleOnly) {
+	public DETaskAbstractSaveNativeFile(DEFrame parent, String dialogTitle, long rowMask) {
 		super(parent, dialogTitle);
-		mVisibleOnly = visibleOnly;
+		mRowMask = rowMask;
 		}
 
 	@Override
@@ -140,6 +135,6 @@ public abstract class DETaskAbstractSaveNativeFile extends DETaskAbstractSaveFil
 			}
 
 		boolean embedDetail = "true".equals(configuration.getProperty(PROPERTY_EMBED_DETAIL));
-		((DEFrame)getParentFrame()).saveNativeFile(file, mVisibleOnly, embedDetail);
+		((DEFrame)getParentFrame()).saveNativeFile(file, mRowMask, embedDetail);
 		}
 	}

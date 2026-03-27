@@ -18,18 +18,14 @@
 
 package com.actelion.research.datawarrior.task.file;
 
-import info.clearthought.layout.TableLayout;
-
-import java.util.Properties;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import com.actelion.research.datawarrior.DEFrame;
 import com.actelion.research.datawarrior.task.ConfigurableTask;
+import com.actelion.research.table.CompoundTableSaver;
 import com.actelion.research.table.model.CompoundTableModel;
+import info.clearthought.layout.TableLayout;
+
+import javax.swing.*;
+import java.util.Properties;
 
 public class DETaskSaveFile extends ConfigurableTask {
     public static final String TASK_NAME = "Save File";
@@ -121,7 +117,7 @@ public class DETaskSaveFile extends ConfigurableTask {
 	@Override
 	public void runTask(Properties configuration) {
 		boolean embedDetail = "true".equals(configuration.getProperty(PROPERTY_EMBED_DETAIL));
-		((DEFrame)getParentFrame()).saveNativeFile(((DEFrame)getParentFrame()).getTableModel().getFile(), false, embedDetail);
+		((DEFrame)getParentFrame()).saveNativeFile(((DEFrame)getParentFrame()).getTableModel().getFile(), CompoundTableSaver.ROW_MASK_ALL, embedDetail);
 		}
 
 	@Override

@@ -18,23 +18,21 @@
 
 package com.actelion.research.datawarrior.task.file;
 
-import java.io.File;
-import java.util.Properties;
-
-import javax.swing.JComponent;
-import javax.swing.JTable;
-
 import com.actelion.research.chem.io.CompoundFileHelper;
 import com.actelion.research.datawarrior.DEFrame;
 import com.actelion.research.datawarrior.DERuntimeProperties;
-import com.actelion.research.table.model.CompoundTableModel;
 import com.actelion.research.table.CompoundTableSaver;
+import com.actelion.research.table.model.CompoundTableModel;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.Properties;
 
 public class DETaskSaveTemplateFileAs extends DETaskAbstractSaveFile {
     public static final String TASK_NAME = "Export Template";
 
 	public DETaskSaveTemplateFileAs(DEFrame parent) {
-		super(parent, "");
+		super(parent, "Export Template File");
 		}
 
 	@Override

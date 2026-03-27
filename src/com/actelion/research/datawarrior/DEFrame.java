@@ -267,15 +267,15 @@ public class DEFrame extends JFrame implements ApplicationViewFactory,CompoundTa
 	/**
 	 * Saves the frames content into the given file without asking any questions.
 	 * @param file proper file with proper privileges
-	 * @param visibleOnly
+	 * @param rowMask CompoundTableSaver.ROW_MASK_ALL or ROW_MASK_VISIBLE, CompoundRecord.cFlagSelected, or list flag
 	 * @param embedDetails
 	 */
-	public void saveNativeFile(final File file, final boolean visibleOnly, boolean embedDetails) {
+	public void saveNativeFile(final File file, final long rowMask, boolean embedDetails) {
 		DERuntimeProperties rtp = new DERuntimeProperties(mParentPane);
 		CompoundTableSaver saver = new CompoundTableSaver(this, mParentPane.getTableModel(), mParentPane.getMainPane().getTable()) {
 			public void finalStatus(File file) {
 				if (file != null
-				 && !visibleOnly)
+				 && rowMask == CompoundTableSaver.ROW_MASK_ALL)
 					setDirty(false);
 				}
 			};
@@ -283,7 +283,7 @@ public class DEFrame extends JFrame implements ApplicationViewFactory,CompoundTa
 		DataDependentPropertyWriter cvpw = new CardViewPositionWriter(getMainFrame().getMainPane());
 		saver.addDataDependentPropertyWriter(clpw);
 		saver.addDataDependentPropertyWriter(cvpw);
-		saver.saveNative(rtp, file, visibleOnly, embedDetails);
+		saver.saveNative(rtp, file, rowMask, embedDetails);
 		}
 
 	/**
@@ -325,7 +325,7 @@ public class DEFrame extends JFrame implements ApplicationViewFactory,CompoundTa
 			mParentPane.getTableModel().setFile(file);
 			}
 
-		saveNativeFile(file, false, true);
+		saveNativeFile(file, CompoundTableSaver.ROW_MASK_ALL, true);
 		}
 
 	/**

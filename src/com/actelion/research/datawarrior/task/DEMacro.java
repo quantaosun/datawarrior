@@ -27,7 +27,8 @@ import com.actelion.research.datawarrior.task.chem.elib.DETaskBuildEvolutionaryL
 import com.actelion.research.datawarrior.task.data.*;
 import com.actelion.research.datawarrior.task.data.fuzzy.DETaskCalculateFuzzyScore;
 import com.actelion.research.datawarrior.task.db.DETaskBuildingBlockQuery;
-import com.actelion.research.datawarrior.task.file.DETaskSaveTextFileAs;
+import com.actelion.research.datawarrior.task.file.DETaskExportSDFile;
+import com.actelion.research.datawarrior.task.file.DETaskExportTextFileAs;
 import com.actelion.research.datawarrior.task.table.DETaskCopyTableCells;
 import com.actelion.research.datawarrior.task.table.DETaskJumpToReferenceRow;
 import com.actelion.research.datawarrior.task.view.*;
@@ -455,8 +456,12 @@ public class DEMacro implements CompoundTableConstants {
 			return StandardTaskFactory.constructTaskCodeFromName(DETaskBuildingBlockQuery.TASK_NAME);
 		else if (taskCode.equals("automaticSARAnalysis") || taskCode.equals("coreBasedSARAnalysis"))
 			return StandardTaskFactory.constructTaskCodeFromName(DETaskDecomposeRGroups.TASK_NAME);
-		else if (taskCode.equals("saveTextFile"))
-			return StandardTaskFactory.constructTaskCodeFromName(DETaskSaveTextFileAs.TASK_NAME_TXT);
+		else if (taskCode.equals("saveCommaSeparatedFile"))
+			return StandardTaskFactory.constructTaskCodeFromName(DETaskExportTextFileAs.TASK_NAME_ALL_CSV);
+		else if (taskCode.equals("saveSDFile"))
+			return StandardTaskFactory.constructTaskCodeFromName(DETaskExportSDFile.TASK_NAME_ALL);
+		else if (taskCode.equals("saveTextFile") || taskCode.equals("saveTABDelimitedFile"))
+			return StandardTaskFactory.constructTaskCodeFromName(DETaskExportTextFileAs.TASK_NAME_ALL_TXT);
 		else if (taskCode.equals("superposeConformers"))
 			return StandardTaskFactory.constructTaskCodeFromName(DETaskSuperposeConformers.TASK_NAME_RIGID);
 

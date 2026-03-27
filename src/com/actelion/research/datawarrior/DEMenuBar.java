@@ -47,6 +47,7 @@ import com.actelion.research.datawarrior.task.view.DETaskCopyViewImage;
 import com.actelion.research.gui.FileHelper;
 import com.actelion.research.gui.JScrollableMenu;
 import com.actelion.research.gui.hidpi.HiDPIHelper;
+import com.actelion.research.table.CompoundTableSaver;
 import com.actelion.research.table.model.*;
 import com.actelion.research.table.view.JCompoundTableForm;
 import com.actelion.research.util.BrowserControl;
@@ -62,6 +63,7 @@ import java.awt.event.*;
 import java.awt.print.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeMap;
@@ -74,7 +76,7 @@ import static com.actelion.research.chem.io.CompoundTableConstants.cReactionPart
 
 public class DEMenuBar extends JMenuBar implements ActionListener,
 		CompoundTableListener,CompoundTableListListener,ItemListener {
-	static final long serialVersionUID = 0x20060728;
+	@Serial private static final long serialVersionUID = 0x20060728;
 
 	public static final boolean SUPPRESS_CHEMISTRY = false;
 
@@ -87,7 +89,6 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 	private static final String MENU_NAME_MACRO = "Macro";
 	private static final String MENU_NAME_HELP = "Help";
 	public static final String USER_MACRO_DIR = "$HOME/datawarrior/macro";
-
 
 	private static final String OPEN_FILE = "open_";
 	private static final String NEW_FROM_LIST = "newFromList_";
@@ -125,42 +126,44 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 	private TreeMap<Integer,int[]> mMacroItemCountMap;
 	private TreeMap<String,DENews> mNewsMap;
 
-	protected JMenu jMenuFileNewFrom,jMenuFileOpenSpecial,jMenuFileOpenRecent,jMenuFileSaveSpecial,jMenuEditPasteSpecial,jMenuDataRemoveRows,
-				  jMenuDataSelfOrganizingMap,jMenuDataSetRange,jMenuDataViewLogarithmic,jMenuChemAddMoleculeDescriptor,
-				  jMenuChemAddReactionDescriptor,jMenuListCreate,jMenuMacroExport,jMenuMacroCopy,jMenuMacroDelete,jMenuMacroRun,jMenuHelp,jMenuHelpNews,jMenuHelpLaF,
-				  jMenuHelpDPIScaling,jMenuHelpUpdate,jMenuHelpTrustedPlugins,jMenuChemSuperpose,jMenuChem3DFragments,jMenuChemMachineLearning;
+	protected JMenu jMenuFileNewFrom,jMenuFileOpenSpecial,jMenuFileOpenRecent,jMenuFileSaveSubsetAs,jMenuFileExport,
+					jMenuFileExportAll,jMenuFileExportSelected,jMenuFileExportVisible,jMenuEditPasteSpecial,jMenuDataRemoveRows,
+					jMenuDataSelfOrganizingMap,jMenuDataSetRange,jMenuDataViewLogarithmic,jMenuChemAddMoleculeDescriptor,
+					jMenuChemAddReactionDescriptor,jMenuListCreate,jMenuMacroExport,jMenuMacroCopy,jMenuMacroDelete,jMenuMacroRun,jMenuHelp,jMenuHelpNews,jMenuHelpLaF,
+					jMenuHelpDPIScaling,jMenuHelpUpdate,jMenuHelpTrustedPlugins,jMenuChemSuperpose,jMenuChem3DFragments,jMenuChemMachineLearning;
 
 	private JMenuItem jMenuFileNew,jMenuFileNewFromVisible,jMenuFileNewFromSelection,jMenuFileNewFromPivoting,jMenuFileNewFromReversePivoting,jMenuFileNewFromTransposition,
-					  jMenuFileOpen,jMenuFileOpenMacro,jMenuFileOpenTemplate,jMenuFileOpenMDLReactions,jMenuFileMerge,
-					  jMenuFileAppend,jMenuFileClose,jMenuFileCloseAll,jMenuFileSave,jMenuFileSaveAs,jMenuFileSaveTXT,jMenuFileSaveCSV,
-					  jMenuFileSaveSDF,jMenuFileSaveTemplate,jMenuFileSaveVisibleAs,jMenuFilePageFormat,
-					  jMenuFilePreview,jMenuFilePrint, jMenuFileQuit,jMenuEditCut,jMenuEditCopy,jMenuEditPaste,
-					  jMenuEditPasteWithHeader,jMenuEditPasteWithoutHeader,jMenuEditDelete,jMenuEditPasteAppend,jMenuEditPasteMerge,
-					  jMenuEditSelectAll,jMenuEditSelectRowsRandomly,jMenuEditExtendSelection,jMenuEditInvertSelection,jMenuEditSearchAndReplace,jMenuEditDisableFilters,
-					  jMenuEditEnableFilters,jMenuEditResetFilters,jMenuEditRemoveFilters,
-					  jMenuEditNewFilter,jMenuDataRemoveColumns,jMenuDataRemoveSelected,jMenuDataRemoveInvisible,
-					  jMenuDataRemoveDuplicate,jMenuDataRemoveUnique,jMenuDataMergeColumns,jMenuDataMergeDuplicate,jMenuDataSplitRows,
-					  jMenuDataAddEmptyColumns,jMenuDataAddEmptyRows,jMenuDataAddRowNumbers,jMenuDataAddCalculatedValues,
-					  jMenuDataAddBinnedColumn,jMenuDataAddFuzzyScore,jMenuDataAddPrincipalComponents,jMenuDataCreateTSNE,jMenuDataCreateUMAP,
-					  jMenuDataSOMCreate,jMenuDataSOMApply,jMenuDataSOMAnalyse, jMenuChemPredictMissingValues, jMenuChemAssessPredictionQuality,
-					  jMenuDataGiniScore,jMenuDataArrangeGraph,jMenuDataCorrelationMatrix,
-					  jMenuChemExtractReactants,jMenuChemExtractCatalysts,jMenuChemExtractProducts,jMenuChemExtractTransformation,
-					  jMenuChemCCLibrary,jMenuChemEALibrary,jMenuChemEnumerateMarkush,jMenuChemAddProperties,jMenuChemAddFormula,jMenuChemAddSmiles,
-					  jMenuChemAddInchi,jMenuChemAddInchiKey,jMenuChemAddCanonicalCode,jMenuChemCreate2DCoords,jMenuChemCreate3DCoords,jMenuChemCalculateConformerEnergy,
-					  jMenuChemSuperposeFlexible,jMenuChemSuperposeRigid,jMenuChemDock, jMenuChem3DFragmentsBuildLib, jMenuChem3DFragmentsReplace,
-					  jMenuChemAddSubstructureCount,jMenuChemAddStructureFromName, jMenuChemDecomposeRGroups,jMenuChemPerformReaction,jMenuChemInteractiveSARTable,
-					  jMenuChemAnalyzeScaffolds,jMenuChemAnalyzeCliffs,jMenuChemMatchFile,jMenuChemSelectDiverse,
-					  jMenuChemCluster, jMenuChemExtractFragment,jMenuChemMapReactions,jMenuChemCompareReactionMapping,jMenuChemAddReactionSmiles,
-					  jMenuChemCreateGenericTautomers,jMenuChemCompareDescriptorSimilarityDistribution,jMenuChemGenerateRandomMolecules,
-					  jMenuChemCreateTaggedSmiles,jMenuChemAddDockingScore,
-					  jMenuChemExtractPairwiseCompoundSimilarities,jMenuChemExtractPairwiseStuff,jMenuChemCountAtomTypes,jMenuChemCheckIDCodes,
-					  jMenuChemRunSurfacePLS,jMenuChemClassifyReactions,jMenuDBWikipedia,jMenuDBReadChEMBL,jMenuDBFindChEMBLActives,jMenuDBPatentReactions,
-					  jMenuDBSearchCOD, jMenuDBSearchBuildingBlocks,jMenuDBSearchChemSpace,jMenuDBRetrieveDataFromURL,jMenuDBRetrieveSQLData,jMenuDBGooglePatents,
-					  jMenuListCreateSelected,jMenuListCreateVisible,jMenuListCreateHidden,jMenuListCreateClipboard,
-					  jMenuListCreateDuplicate,jMenuListCreateUnique,jMenuListCreateDistinct,
-					  jMenuListCreateMerge,jMenuListDeleteAll,jMenuListNewColumn,jMenuListListsFromColumn,jMenuListImport,
-					  jMenuListExport,jMenuMacroImport,jMenuMacroPaste,jMenuMacroStartRecording,jMenuMacroContinueRecording,
-					  jMenuMacroStopRecording,jMenuHelpHelp,jMenuHelpShortcuts,jMenuHelpMoreData,jMenuHelpForum,jMenuHelpAbout;
+					jMenuFileOpen,jMenuFileOpenMacro,jMenuFileOpenTemplate,jMenuFileOpenMDLReactions,jMenuFileMerge,
+					jMenuFileAppend,jMenuFileClose,jMenuFileCloseAll,jMenuFileSave,jMenuFileSaveAs, jMenuFileExportTXT, jMenuFileExportCSV,
+					jMenuFileExportSDF, jMenuFileExportTemplate,jMenuFileSaveVisibleAs,jMenuFileSaveSelectedAs,
+					jMenuFileExportSelectedTXT,jMenuFileExportSelectedCSV,jMenuFileExportSelectedSDF,jMenuFileExportVisibleTXT,jMenuFileExportVisibleCSV,jMenuFileExportVisibleSDF,
+					jMenuFilePageFormat,jMenuFilePreview,jMenuFilePrint, jMenuFileQuit,jMenuEditCut,jMenuEditCopy,jMenuEditPaste,
+					jMenuEditPasteWithHeader,jMenuEditPasteWithoutHeader,jMenuEditDelete,jMenuEditPasteAppend,jMenuEditPasteMerge,
+					jMenuEditSelectAll,jMenuEditSelectRowsRandomly,jMenuEditExtendSelection,jMenuEditInvertSelection,jMenuEditSearchAndReplace,jMenuEditDisableFilters,
+					jMenuEditEnableFilters,jMenuEditResetFilters,jMenuEditRemoveFilters,
+					jMenuEditNewFilter,jMenuDataRemoveColumns,jMenuDataRemoveSelected,jMenuDataRemoveInvisible,
+					jMenuDataRemoveDuplicate,jMenuDataRemoveUnique,jMenuDataMergeColumns,jMenuDataMergeDuplicate,jMenuDataSplitRows,
+					jMenuDataAddEmptyColumns,jMenuDataAddEmptyRows,jMenuDataAddRowNumbers,jMenuDataAddCalculatedValues,
+					jMenuDataAddBinnedColumn,jMenuDataAddFuzzyScore,jMenuDataAddPrincipalComponents,jMenuDataCreateTSNE,jMenuDataCreateUMAP,
+					jMenuDataSOMCreate,jMenuDataSOMApply,jMenuDataSOMAnalyse, jMenuChemPredictMissingValues, jMenuChemAssessPredictionQuality,
+					jMenuDataGiniScore,jMenuDataArrangeGraph,jMenuDataCorrelationMatrix,
+					jMenuChemExtractReactants,jMenuChemExtractCatalysts,jMenuChemExtractProducts,jMenuChemExtractTransformation,
+					jMenuChemCCLibrary,jMenuChemEALibrary,jMenuChemEnumerateMarkush,jMenuChemAddProperties,jMenuChemAddFormula,jMenuChemAddSmiles,
+					jMenuChemAddInchi,jMenuChemAddInchiKey,jMenuChemAddCanonicalCode,jMenuChemCreate2DCoords,jMenuChemCreate3DCoords,jMenuChemCalculateConformerEnergy,
+					jMenuChemSuperposeFlexible,jMenuChemSuperposeRigid,jMenuChemDock, jMenuChem3DFragmentsBuildLib, jMenuChem3DFragmentsReplace,
+					jMenuChemAddSubstructureCount,jMenuChemAddStructureFromName, jMenuChemDecomposeRGroups,jMenuChemPerformReaction,jMenuChemInteractiveSARTable,
+					jMenuChemAnalyzeScaffolds,jMenuChemAnalyzeCliffs,jMenuChemMatchFile,jMenuChemSelectDiverse,
+					jMenuChemCluster, jMenuChemExtractFragment,jMenuChemMapReactions,jMenuChemCompareReactionMapping,jMenuChemAddReactionSmiles,
+					jMenuChemCreateGenericTautomers,jMenuChemCompareDescriptorSimilarityDistribution,jMenuChemGenerateRandomMolecules,
+					jMenuChemCreateTaggedSmiles,jMenuChemAddDockingScore,
+					jMenuChemExtractPairwiseCompoundSimilarities,jMenuChemExtractPairwiseStuff,jMenuChemCountAtomTypes,jMenuChemCheckIDCodes,
+					jMenuChemRunSurfacePLS,jMenuChemClassifyReactions,jMenuDBWikipedia,jMenuDBReadChEMBL,jMenuDBFindChEMBLActives,jMenuDBPatentReactions,
+					jMenuDBSearchCOD, jMenuDBSearchBuildingBlocks,jMenuDBSearchChemSpace,jMenuDBRetrieveDataFromURL,jMenuDBRetrieveSQLData,jMenuDBGooglePatents,
+					jMenuListCreateSelected,jMenuListCreateVisible,jMenuListCreateHidden,jMenuListCreateClipboard,
+					jMenuListCreateDuplicate,jMenuListCreateUnique,jMenuListCreateDistinct,
+					jMenuListCreateMerge,jMenuListDeleteAll,jMenuListNewColumn,jMenuListListsFromColumn,jMenuListImport,
+					jMenuListExport,jMenuMacroImport,jMenuMacroPaste,jMenuMacroStartRecording,jMenuMacroContinueRecording,
+					jMenuMacroStopRecording,jMenuHelpHelp,jMenuHelpShortcuts,jMenuHelpMoreData,jMenuHelpForum,jMenuHelpAbout;
 
 	private DEScrollableMenu jMenuFileNewFromList,jMenuListAddSelectedTo,jMenuListRemoveSelectedFrom,
 			jMenuListSelectFrom,jMenuListDeselectFrom,jMenuListDelete;
@@ -498,12 +501,23 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 		jMenuFileCloseAll = new JMenuItem();
 		jMenuFileSave = new JMenuItem();
 		jMenuFileSaveAs = new JMenuItem();
-		jMenuFileSaveSpecial = new JMenu();
-		jMenuFileSaveTXT = new JMenuItem();
-		jMenuFileSaveCSV = new JMenuItem();
-		jMenuFileSaveSDF = new JMenuItem();
-		jMenuFileSaveTemplate = new JMenuItem();
+		jMenuFileSaveSubsetAs = new JMenu();
 		jMenuFileSaveVisibleAs = new JMenuItem();
+		jMenuFileSaveSelectedAs = new JMenuItem();
+		jMenuFileExport = new JMenu();
+		jMenuFileExportTXT = new JMenuItem();
+		jMenuFileExportCSV = new JMenuItem();
+		jMenuFileExportSDF = new JMenuItem();
+		jMenuFileExportTemplate = new JMenuItem();
+		jMenuFileExportAll = new JMenu();
+		jMenuFileExportSelected = new JMenu();
+		jMenuFileExportVisible = new JMenu();
+		jMenuFileExportSelectedTXT = new JMenuItem();
+		jMenuFileExportSelectedCSV = new JMenuItem();
+		jMenuFileExportSelectedSDF = new JMenuItem();
+		jMenuFileExportVisibleTXT = new JMenuItem();
+		jMenuFileExportVisibleCSV = new JMenuItem();
+		jMenuFileExportVisibleSDF = new JMenuItem();
 		jMenuFilePageFormat = new JMenuItem();
 		jMenuFilePreview = new JMenuItem();
 		jMenuFilePrint = new JMenuItem();
@@ -552,17 +566,35 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 		jMenuFileSaveAs.setText("Save As...");
 		jMenuFileSaveAs.setAccelerator(KeyStroke.getKeyStroke('S', Event.SHIFT_MASK | MENU_MASK));
 		jMenuFileSaveAs.addActionListener(this);
-		jMenuFileSaveSpecial.setText("Save Special");
-		jMenuFileSaveTXT.setText("TAB-Delimited Textfile...");
-		jMenuFileSaveTXT.addActionListener(this);
-		jMenuFileSaveCSV.setText("Comma-Separated Textfile...");
-		jMenuFileSaveCSV.addActionListener(this);
-		jMenuFileSaveSDF.setText("SD-File...");
-		jMenuFileSaveSDF.addActionListener(this);
-		jMenuFileSaveTemplate.setText("Template...");
-		jMenuFileSaveTemplate.addActionListener(this);
-		jMenuFileSaveVisibleAs.setText("Save Visible As...");
+		jMenuFileSaveSubsetAs.setText("Save Subset");
+		jMenuFileSaveSelectedAs.setText("Selection As...");
+		jMenuFileSaveSelectedAs.addActionListener(this);
+		jMenuFileSaveVisibleAs.setText("Visible Rows As...");
 		jMenuFileSaveVisibleAs.addActionListener(this);
+		jMenuFileExport.setText("Export");
+		jMenuFileExportTXT.setText("TAB-Delimited Textfile...");
+		jMenuFileExportTXT.addActionListener(this);
+		jMenuFileExportCSV.setText("Comma-Separated Textfile...");
+		jMenuFileExportCSV.addActionListener(this);
+		jMenuFileExportSDF.setText("SD-File...");
+		jMenuFileExportSDF.addActionListener(this);
+		jMenuFileExportTemplate.setText("Template...");
+		jMenuFileExportTemplate.addActionListener(this);
+		jMenuFileExportAll.setText("All Rows As");
+		jMenuFileExportSelected.setText("Selection As");
+		jMenuFileExportVisible.setText("Visible Rows As");
+		jMenuFileExportSelectedTXT.setText("TAB-Delimited Textfile...");
+		jMenuFileExportSelectedTXT.addActionListener(this);
+		jMenuFileExportSelectedCSV.setText("Comma-Separated Textfile...");
+		jMenuFileExportSelectedCSV.addActionListener(this);
+		jMenuFileExportSelectedSDF.setText("SD-File...");
+		jMenuFileExportSelectedSDF.addActionListener(this);
+		jMenuFileExportVisibleTXT.setText("TAB-Delimited Textfile...");
+		jMenuFileExportVisibleTXT.addActionListener(this);
+		jMenuFileExportVisibleCSV.setText("Comma-Separated Textfile...");
+		jMenuFileExportVisibleCSV.addActionListener(this);
+		jMenuFileExportVisibleSDF.setText("SD-File...");
+		jMenuFileExportVisibleSDF.addActionListener(this);
 		jMenuFilePageFormat.setText("Page Format...");
 		jMenuFilePageFormat.addActionListener(this);
 		jMenuFilePreview.setText("Print Preview");
@@ -579,8 +611,8 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 		jMenuFile.setMnemonic(KeyEvent.VK_F);
 		jMenuFile.setText(MENU_NAME_FILE);
 		jMenuFile.add(jMenuFileNew);
-		jMenuFileNewFrom.add(jMenuFileNewFromVisible);
 		jMenuFileNewFrom.add(jMenuFileNewFromSelection);
+		jMenuFileNewFrom.add(jMenuFileNewFromVisible);
 		jMenuFileNewFrom.add(jMenuFileNewFromList);
 		jMenuFileNewFrom.add(jMenuFileNewFromPivoting);
 		jMenuFileNewFrom.add(jMenuFileNewFromReversePivoting);
@@ -609,14 +641,25 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 		jMenuFile.addSeparator();
 		jMenuFile.add(jMenuFileSave);
 		jMenuFile.add(jMenuFileSaveAs);
-		jMenuFileSaveSpecial.add(jMenuFileSaveTXT);
-		jMenuFileSaveSpecial.add(jMenuFileSaveCSV);
-		jMenuFileSaveSpecial.add(jMenuFileSaveSDF);
-		jMenuFileSaveSpecial.add(jMenuFileSaveTemplate);
-		jMenuFile.add(jMenuFileSaveSpecial);
- 		jMenuFile.addSeparator();
-		jMenuFile.add(jMenuFileSaveVisibleAs);
+		jMenuFile.add(jMenuFileSaveSubsetAs);
+		jMenuFileSaveSubsetAs.add(jMenuFileSaveVisibleAs);
+		jMenuFileSaveSubsetAs.add(jMenuFileSaveSelectedAs);
 		jMenuFile.addSeparator();
+		jMenuFileExportAll.add(jMenuFileExportTXT);
+		jMenuFileExportAll.add(jMenuFileExportCSV);
+		jMenuFileExportAll.add(jMenuFileExportSDF);
+		jMenuFileExportSelected.add(jMenuFileExportSelectedTXT);
+		jMenuFileExportSelected.add(jMenuFileExportSelectedCSV);
+		jMenuFileExportSelected.add(jMenuFileExportSelectedSDF);
+		jMenuFileExportVisible.add(jMenuFileExportVisibleTXT);
+		jMenuFileExportVisible.add(jMenuFileExportVisibleCSV);
+		jMenuFileExportVisible.add(jMenuFileExportVisibleSDF);
+		jMenuFileExport.add(jMenuFileExportAll);
+		jMenuFileExport.add(jMenuFileExportSelected);
+		jMenuFileExport.add(jMenuFileExportVisible);
+		jMenuFileExport.add(jMenuFileExportTemplate);
+		jMenuFile.add(jMenuFileExport);
+ 		jMenuFile.addSeparator();
 		jMenuFile.add(jMenuFilePageFormat);
 //		jMenuFile.add(jMenuFilePreview);
 		jMenuFile.add(jMenuFilePrint);
@@ -1688,16 +1731,30 @@ public class DEMenuBar extends JMenuBar implements ActionListener,
 					new DETaskSaveFile(mParentFrame).defineAndRun();
 			} else if (source == jMenuFileSaveAs)
 				new DETaskSaveFileAs(mParentFrame).defineAndRun();
-			else if (source == jMenuFileSaveTXT)
-				new DETaskSaveTextFileAs(mParentFrame, FileHelper.cFileTypeTextTabDelimited).defineAndRun();
-			else if (source == jMenuFileSaveCSV)
-				new DETaskSaveTextFileAs(mParentFrame, FileHelper.cFileTypeTextCommaSeparated).defineAndRun();
-			else if (source == jMenuFileSaveSDF)
-				new DETaskSaveSDFileAs(mParentFrame).defineAndRun();
-			else if (source == jMenuFileSaveTemplate)
-				new DETaskSaveTemplateFileAs(mParentFrame).defineAndRun();
 			else if (source == jMenuFileSaveVisibleAs)
 				new DETaskSaveVisibleRowsAs(mParentFrame).defineAndRun();
+			else if (source == jMenuFileSaveSelectedAs)
+				new DETaskSaveSelectedRowsAs(mParentFrame).defineAndRun();
+			else if (source == jMenuFileExportTXT)
+				new DETaskExportTextFileAs(mParentFrame, FileHelper.cFileTypeTextTabDelimited, CompoundTableSaver.ROW_MASK_ALL).defineAndRun();
+			else if (source == jMenuFileExportCSV)
+				new DETaskExportTextFileAs(mParentFrame, FileHelper.cFileTypeTextCommaSeparated, CompoundTableSaver.ROW_MASK_ALL).defineAndRun();
+			else if (source == jMenuFileExportSDF)
+				new DETaskExportSDFile(mParentFrame, CompoundTableSaver.ROW_MASK_ALL).defineAndRun();
+			else if (source == jMenuFileExportTemplate)
+				new DETaskSaveTemplateFileAs(mParentFrame).defineAndRun();
+			else if (source == jMenuFileExportSelectedTXT)
+				new DETaskExportTextFileAs(mParentFrame, FileHelper.cFileTypeTextTabDelimited, CompoundRecord.cFlagMaskSelected).defineAndRun();
+			else if (source == jMenuFileExportSelectedCSV)
+				new DETaskExportTextFileAs(mParentFrame, FileHelper.cFileTypeTextCommaSeparated, CompoundRecord.cFlagMaskSelected).defineAndRun();
+			else if (source == jMenuFileExportSelectedSDF)
+				new DETaskExportSDFile(mParentFrame, CompoundRecord.cFlagMaskSelected).defineAndRun();
+			else if (source == jMenuFileExportVisibleTXT)
+				new DETaskExportTextFileAs(mParentFrame, FileHelper.cFileTypeTextTabDelimited, CompoundTableSaver.ROW_MASK_VISIBLE).defineAndRun();
+			else if (source == jMenuFileExportVisibleCSV)
+				new DETaskExportTextFileAs(mParentFrame, FileHelper.cFileTypeTextCommaSeparated, CompoundTableSaver.ROW_MASK_VISIBLE).defineAndRun();
+			else if (source == jMenuFileExportVisibleSDF)
+				new DETaskExportSDFile(mParentFrame, CompoundTableSaver.ROW_MASK_VISIBLE).defineAndRun();
 			else if (source == jMenuEditCopy)
 				new DETaskCopyViewContent(mParentFrame).defineAndRun();
 			else if (source == jMenuEditPaste)

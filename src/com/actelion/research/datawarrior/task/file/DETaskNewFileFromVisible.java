@@ -28,17 +28,15 @@ import com.actelion.research.table.model.CompoundTableEvent;
 import com.actelion.research.table.model.CompoundTableListHandler;
 import com.actelion.research.table.model.CompoundTableModel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.TreeSet;
+import java.util.*;
 
 
 public class DETaskNewFileFromVisible extends AbstractTaskWithoutConfiguration {
 	public static final String TASK_NAME = "New File From Visible Rows";
 
-	private DEFrame		mSourceFrame,mTargetFrame;
-	private DataWarrior	mApplication;
+	private final DataWarrior	mApplication;
+	private final DEFrame		mSourceFrame;
+	private DEFrame				mTargetFrame;
 
 	public DETaskNewFileFromVisible(DEFrame sourceFrame, DataWarrior application) {
 		super(sourceFrame, false);
@@ -77,7 +75,7 @@ public class DETaskNewFileFromVisible extends AbstractTaskWithoutConfiguration {
         CompoundTableListHandler sourceHitlistHandler = sourceTableModel.getListHandler();
 
        	boolean[] hitlistUsed = new boolean[sourceHitlistHandler.getListCount()];
-       	long hitlistMask[] = null;
+       	long[] hitlistMask = null;
        	if (hitlistUsed.length != 0) {
        		hitlistMask = new long[hitlistUsed.length];
        		for (int i=0; i<hitlistUsed.length; i++)
@@ -102,16 +100,15 @@ public class DETaskNewFileFromVisible extends AbstractTaskWithoutConfiguration {
         		targetTableModel.setColumnProperty(column, key, properties.get(key));
         	}
 
-		TreeSet<String> detaiIDSet = new TreeSet<String>();
+		TreeSet<String> detaiIDSet = new TreeSet<>();
        	for (int row=0; row<sourceTableModel.getRowCount(); row++) {
 			for (int column=0; column<sourceTableModel.getTotalColumnCount(); column++) {
 				targetTableModel.setTotalValueAt(sourceTableModel.encodeDataWithDetail(sourceTableModel.getRecord(row), column), row, column);
 				String[][] key = sourceTableModel.getRecord(row).getDetailReferences(column);
 				if (key != null)
-					for (int detailIndex=0; detailIndex<key.length; detailIndex++)
-						if (key[detailIndex] != null)
-							for (int i=0; i<key[detailIndex].length; i++)
-								detaiIDSet.add(key[detailIndex][i]);
+					for (String[] strings : key)
+						if (strings != null)
+							Collections.addAll(detaiIDSet, strings);
 				}
         	}
 
@@ -137,7 +134,7 @@ public class DETaskNewFileFromVisible extends AbstractTaskWithoutConfiguration {
 			targetTableModel.setExtensionData(CompoundTableConstants.cExtensionNameFileExplanation, explanation);
 
 		ArrayList<DEMacro> macroList = (ArrayList<DEMacro>) sourceTableModel.getExtensionData(CompoundTableConstants.cExtensionNameMacroList);
-		if (macroList != null && macroList.size() != 0) {
+		if (macroList != null && !macroList.isEmpty()) {
 			ArrayList<DEMacro> copy = new ArrayList<>();
 			for (DEMacro macro:macroList)
 				copy.add(new DEMacro(macro.getName(), copy, macro));

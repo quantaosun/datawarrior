@@ -135,7 +135,7 @@ public abstract class AbstractTask implements ProgressController {
 
 	/**
 	 * After task execution this method is called to put the correct frame in front
-	 * @return null or new created created during task processing
+	 * @return null or new created during task processing
 	 */
 	public abstract DEFrame getNewFrontFrame();
 

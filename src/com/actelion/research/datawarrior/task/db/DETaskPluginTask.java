@@ -68,7 +68,9 @@ public class DETaskPluginTask extends ConfigurableTask {
 
 	@Override
 	public boolean isConfigurationValid(Properties configuration, boolean isLive) {
+		configuration.setProperty("taskIsLive", isLive ? "true" : "false");
 		String error = mDelegate.checkConfiguration(configuration);
+		configuration.remove("taskIsLive");
 		if (error == null)
 			return true;
 

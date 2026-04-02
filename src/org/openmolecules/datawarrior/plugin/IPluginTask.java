@@ -79,6 +79,9 @@ public interface IPluginTask {
 
 	/**
 	 * Checks, whether the task configuration is valid such that the task can be executed without forseeable errors.
+	 * From DataWarrior v.6.5.4 the configuration contains a special key-value pair (key:"taskIsLive",
+	 * value:"true", "false"), which defines, whether the check is done in order to run the task on
+	 * current data, or whether it is just to confirm that its configuration is compatible within a macro.
 	 * @param configuration
 	 * @return null if configuration is valid; otherwise human-readable error message
 	 */

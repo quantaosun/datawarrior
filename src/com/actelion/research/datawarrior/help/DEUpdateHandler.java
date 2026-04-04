@@ -53,13 +53,13 @@ import java.util.prefs.Preferences;
 
 public class DEUpdateHandler extends JDialog implements ActionListener {
 	private static final String URL1 = "https://dwversion.openmolecules.org";
-	private static final String URL2 = "http://datawarrior.org:8084";
+	private static final String URL2 = "https://dwversion.datawarrior.org";
 	private static final String DEFAULT_UPDATE_URL = "https://openmolecules.org/datawarrior/update";
 	private static final String DEFAULT_PLUGIN_URL = "https://openmolecules.org/datawarrior/plugin";
 
 	// IMPORTANT: When creating a new manual(!!!) installer (not an update for automatic deployment),
 	// then DataWarriorLauncher.BASE_VERSION must also be changed to match this DATAWARRIOR_VERSION!
-	public static final String DATAWARRIOR_VERSION = "v06.05.03";	// format must be v00.00.00
+	public static final String DATAWARRIOR_VERSION = "v06.05.04";	// format must be v00.00.00
 
 	private static final String PREFERENCES_2ND_POST_INSTALL_INFO_SERVER = "2nd_post_install_info_server";
 	public static final String PREFERENCES_POST_INSTALL_INFO_FAILURE_MILLIS = "post_install_info_failure_time";

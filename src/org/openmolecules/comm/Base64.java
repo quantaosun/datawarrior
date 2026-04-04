@@ -859,7 +859,7 @@ public class Base64
         try {
             encoded = encodeBytesToBytes( source, 0, source.length, Base64.NO_OPTIONS );
         } catch( java.io.IOException ex ) {
-            assert false : "IOExceptions only come from GZipping, which is turned off: " + ex.getMessage();
+            assert false : "IOExceptions only come from GZipping, which is turned off: ".concat(ex.getMessage());
         }
         return encoded;
     }
@@ -890,16 +890,16 @@ public class Base64
         }   // end if: null
 
         if( off < 0 ){
-            throw new IllegalArgumentException( "Cannot have negative offset: " + off );
+            throw new IllegalArgumentException( "Cannot have negative offset: ".concat(Integer.toString(off)));
         }   // end if: off < 0
 
         if( len < 0 ){
-            throw new IllegalArgumentException( "Cannot have length offset: " + len );
+            throw new IllegalArgumentException( "Cannot have length offset: ".concat(Integer.toString(len)));
         }   // end if: len < 0
 
-        if( off + len > source.length  ){
+        if( off + len > source.length ){
             throw new IllegalArgumentException(
-            String.format( "Cannot have offset of %d and length of %d with array of length %d", off,len,source.length));
+            String.format( "Cannot have offset of %d and length of %d with array of length %d", off, len,source.length));
         }   // end if: off < 0
 
 
@@ -1161,7 +1161,7 @@ public class Base64
             return new byte[0];
         }else if( len < 4 ){
             throw new IllegalArgumentException( 
-            "Base64-encoded string must have at least four characters, but length specified was " + len );
+            "Base64-encoded string must have at least four characters, but length specified was ".concat(Integer.toString(len)));
         }   // end if
         
         byte[] DECODABET = getDecodabet( options );
@@ -1488,7 +1488,7 @@ public class Base64
             // Check for size of file
             if( file.length() > Integer.MAX_VALUE )
             {
-                throw new java.io.IOException( "File is too big for this convenience method (" + file.length() + " bytes)." );
+                throw new java.io.IOException( "File is too big for this convenience method (".concat(Long.toString(file.length())).concat(" bytes)."));
             }   // end if: file too big for int index
             buffer = new byte[ (int)file.length() ];
             

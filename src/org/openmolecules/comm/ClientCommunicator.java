@@ -224,20 +224,15 @@ public abstract class ClientCommunicator extends CommunicationHelper {
 				showErrorMessage(see.getMessage());
 				return null;
 				}
-			catch (ConnectException | UnknownHostException | SocketTimeoutException e) {  // connection refused
+			catch (IOException e) {  // connection refused
 				reportException(e);
 				if (!mayUseSecondaryServer) {
 					showErrorMessage(e.toString());
 					return null;
 					}
-				String reason = (e instanceof UnknownHostException) ? "Unknown host:"+url
+				String reason = (e instanceof UnknownHostException) ? "Unknown host:".concat(url)
 							  : (e instanceof ConnectException) ? "Connection refused" : "Connection timed out";
 				showBusyMessage(reason.concat(". Trying alternative server..."));
-				}
-			catch (IOException ioe) {
-				reportException(ioe);
-				showErrorMessage(ioe.toString());
-				return null;
 				}
 			}
 
@@ -307,8 +302,8 @@ public abstract class ClientCommunicator extends CommunicationHelper {
 		else if (response.startsWith("SERVER_MESSAGE"))    // rest server prefix, e.g. hyperspace server
 			return response.substring("SERVER_MESSAGE".length() + 1);
 		else if (response.startsWith(BODY_ERROR))
-			throw new ServerErrorException("Error: " + response.substring(BODY_ERROR.length() + 1));
+			throw new ServerErrorException("Error: ".concat(response.substring(BODY_ERROR.length() + 1)));
         else
-	        throw new ServerErrorException("Unexpected response:" + (response.length()<40 ? response : response.substring(0, 40) + "..."));
+	        throw new ServerErrorException("Unexpected response:".concat(response.length()<40 ? response : response.substring(0, 40).concat("...")));
 		}
 	}

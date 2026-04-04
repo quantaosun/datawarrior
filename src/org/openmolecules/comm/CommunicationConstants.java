@@ -21,7 +21,7 @@ public interface CommunicationConstants {
     String BODY_MESSAGE = "Message";
     String BODY_OBJECT = "Object";
     String BODY_ERROR = "Error";
-    String BODY_ERROR_INVALID_SESSION = BODY_ERROR + ":" + ERROR_INVALID_SESSION;
+    String BODY_ERROR_INVALID_SESSION = BODY_ERROR.concat(":").concat(ERROR_INVALID_SESSION);
     String BODY_IMAGE_PNG = "PNG";
 
     String KEY_SESSION_ID = "sessionID";
@@ -37,4 +37,6 @@ public interface CommunicationConstants {
     String REQUEST_GET_STATUS = "status";
     String REQUEST_RUN_QUERY = "query";
     String REQUEST_LOGIN = "login";
+    String REQUEST_LOGOUT = "logout";
+    String REQUEST_HELP = "help";
 	}

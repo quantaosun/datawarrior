@@ -14,22 +14,13 @@
 
 package org.openmolecules.comm;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class CommunicationHelper implements CommunicationConstants {
 	private static final String USER_AGENT = "Mozilla/5.0";
@@ -45,15 +36,11 @@ public class CommunicationHelper implements CommunicationConstants {
             decoded = objectStream.readObject();
             objectStream.close();
             }
-        catch (ClassNotFoundException e) {
+        catch (ClassNotFoundException | IOException e) {
         	e.printStackTrace();
             decoded = null;
             }
-        catch (IOException e) {
-        	e.printStackTrace();
-            decoded = null;
-            }
-        return decoded;
+		return decoded;
         }
 
     public static String encode(Serializable object) {
@@ -78,7 +65,7 @@ public class CommunicationHelper implements CommunicationConstants {
         }
 
 	public static String sendGet(String url) throws Exception {
-		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+		HttpURLConnection con = (HttpURLConnection) new URI(url).toURL().openConnection();
  
 		// optional default is GET
 		con.setRequestMethod("GET");
@@ -90,7 +77,7 @@ public class CommunicationHelper implements CommunicationConstants {
  
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String inputLine;
-		StringBuffer response = new StringBuffer();
+		StringBuilder response = new StringBuilder();
  
 		while ((inputLine = in.readLine()) != null)
 			response.append(inputLine);
@@ -106,7 +93,7 @@ public class CommunicationHelper implements CommunicationConstants {
 	 * @throws Exception
 	 */
 	public static String sendPost(String url, String params) throws Exception {
-		HttpsURLConnection con = (HttpsURLConnection)new URL(url).openConnection();
+		HttpsURLConnection con = (HttpsURLConnection)new URI(url).toURL().openConnection();
  
 		con.setRequestMethod("POST");
 		con.setRequestProperty("User-Agent", USER_AGENT);
@@ -122,7 +109,7 @@ public class CommunicationHelper implements CommunicationConstants {
  
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String inputLine;
-		StringBuffer response = new StringBuffer();
+		StringBuilder response = new StringBuilder();
  
 		while ((inputLine = in.readLine()) != null)
 			response.append(inputLine);
